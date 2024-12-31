@@ -18,6 +18,7 @@ const RegisterPage = () => {
     }
     dispatch(registerUser(userDetails));
     navigate('/login');
+    
   };
 
 

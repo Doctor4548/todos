@@ -31,7 +31,6 @@ export const deleteTodo = createAsyncThunk('todos/deleteTodo', async (id, thunkA
 export const updateTodoStatus = createAsyncThunk('todos/updateTodoStatus', async ({ id, status }, thunkAPI) => {
   try {
     const response = await axios.put(`/todo/tasks/${id}`, { status });
-    //console.log(response.data.task)
     return response.data.task;
   } catch (error) {
     return thunkAPI.rejectWithValue(error.response.data);
@@ -45,8 +44,10 @@ const todoSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchTodos.fulfilled, (state, action) => {
-        //console.log(action.payload)
-        state.tasks = action.payload;
+        state.tasks = action.payload.sort((a, b)=>{
+          if(a.completed===b.completed) return 0;
+          return a.completed? 1: -1
+        });
         state.loading = false;
       })
       .addCase(fetchTodos.pending, (state) => {
@@ -56,8 +57,11 @@ const todoSlice = createSlice({
         state.error = action.payload;
         state.loading = false;
       })
+
+
+
       .addCase(createTodo.fulfilled, (state, action) => {
-        state.tasks.push(action.payload);
+        state.tasks.unshift(action.payload);
         state.loading = false;
       })
       .addCase(createTodo.pending, (state) => {
@@ -68,7 +72,6 @@ const todoSlice = createSlice({
         state.loading = false;
       })
       .addCase(deleteTodo.fulfilled, (state, action) => {
-        console.log(state.tasks, action.payload);
         state.tasks = state.tasks.filter(task => task._id !== action.payload); 
         state.loading = false;
       })
@@ -86,6 +89,12 @@ const todoSlice = createSlice({
         if (index !== -1) {
           state.tasks[index] = action.payload;
         }
+
+        state.tasks = state.tasks.sort((a, b) => {
+          if (a.completed === b.completed) return 0;
+          return a.completed ? 1 : -1;
+        });
+
         state.loading = false;
       })
       .addCase(updateTodoStatus.pending, (state) => {

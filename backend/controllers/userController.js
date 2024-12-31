@@ -2,19 +2,19 @@ const userModel = require('../Models/User.js');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt')
 
-const handleUserRegister = async(req, res)=>{
-    const {username, password} = req.body;
+const handleUserRegister = async (req, res) => {
+    const { username, password } = req.body;
 
-    if(!username || !password){
+    if (!username || !password) {
         return res.status(400).json({
             message: 'username and passsword required'
         })
     }
 
-    try{
-        const duplicateUser = await userModel.findOne({username: username});
+    try {
+        const duplicateUser = await userModel.findOne({ username: username });
 
-        if(duplicateUser){
+        if (duplicateUser) {
             return res.status(400).json('user already existed')
         }
 
@@ -33,7 +33,7 @@ const handleUserRegister = async(req, res)=>{
             message: 'Successfully create an account'
         })
 
-    }catch(err){
+    } catch (err) {
         return res.status(500).json({
             message: 'server side error',
             error: err
@@ -42,26 +42,21 @@ const handleUserRegister = async(req, res)=>{
 }
 
 
-const handleUserLogin = async(req, res)=>{
-    const {username, password} = req.body;
+const handleUserLogin = async (req, res) => {
+    const { username, password } = req.body;
 
-    if(!username || !password){
+    if (!username || !password) {
         return res.status(400).json({
             message: 'username and passsword required'
         })
     }
 
-    try{
-        const duplicateUser = await userModel.findOne({username: username})
-        if(!duplicateUser){
-            return res.status(400).json('user does not existed')
-        }
-
-
+    try {
+        const duplicateUser = await userModel.findOne({ username: username })
         const passwordMatch = bcrypt.compareSync(password, duplicateUser.password)
 
-        if(!passwordMatch){
-            return res.status(400).json('password does not match')
+        if (! duplicateUser || !passwordMatch) {
+            return res.status(400).json('password or username does not match')
         }
 
         const userToken = jwt.sign({
@@ -81,7 +76,7 @@ const handleUserLogin = async(req, res)=>{
             message: 'Successfully login'
         })
 
-    }catch(err){
+    } catch (err) {
         return res.status(500).json({
             message: 'server side error',
             error: err
@@ -89,9 +84,40 @@ const handleUserLogin = async(req, res)=>{
     }
 }
 
+const handleCheckAuth = async (req, res) => {
+    const { token } = req.cookies;
+
+    if (token) {
+        return res.status(201).json('Currently Login')
+    }
+    return res.status(400).json('Not yet login')
+}
+
+
+const handleUserLogout = async (req, res) => {
+    try {
+        res.clearCookie('token', {
+            httpOnly: true,
+            sameSite: 'strict',
+        });
+
+        return res.status(200).json({
+            message: 'Successfully logged out',
+        });
+    } catch (err) {
+        return res.status(500).json({
+            message: 'Server error',
+            error: err,
+        });
+    }
+};
+
+
 
 
 module.exports = {
     handleUserRegister,
     handleUserLogin,
+    handleCheckAuth,
+    handleUserLogout
 }

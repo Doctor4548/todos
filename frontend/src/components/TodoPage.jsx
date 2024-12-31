@@ -14,6 +14,7 @@ const TodoPage = () => {
     title: '',
     content: '',
   });
+  const [emptyInput, setEmptyInput] = useState(false)
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -23,7 +24,6 @@ const TodoPage = () => {
     }
   }, [dispatch, isAuthenticated, navigate]);
 
-  console.log(loading)
 
   const handleAddTask = () => {
     if (newTask.title.trim() &&newTask.content.trim()) {
@@ -32,6 +32,9 @@ const TodoPage = () => {
         title: '',
         content: '',
       });
+      setEmptyInput(false)
+    }else{
+      setEmptyInput(true)
     }
   };
 
@@ -46,7 +49,7 @@ const TodoPage = () => {
 
   return (
     <Box sx={{ maxWidth: 600, margin: 'auto', padding: 2 }}>
-      <Typography variant="h4" gutterBottom>Todo List</Typography>
+      <Typography variant="h4" onClick={()=>{navigate('../')}} gutterBottom style={{cursor: 'pointer'}}>Todo List</Typography>
       <TextField
         label="title"
         value={newTask.title}
@@ -60,7 +63,13 @@ const TodoPage = () => {
         onChange={(e) => setNewTask((old)=>({...old, content: e.target.value}))}
         fullWidth
         margin="none"
+        multiline
+        minRows={4} 
+        maxRows={6} 
       />
+      {emptyInput &&<Typography variant="h6" gutterBottom color='error'>
+        Empty Input
+      </Typography>}
       <Button variant="contained" onClick={handleAddTask} sx={{ marginBottom: 2 }}>
         Add Task
       </Button>
