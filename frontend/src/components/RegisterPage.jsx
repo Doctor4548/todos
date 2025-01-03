@@ -3,21 +3,39 @@ import { useDispatch, useSelector } from 'react-redux';
 import { registerUser } from '../redux/slices/authSlice';
 import { Button, TextField, Box, Typography, CircularProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { isStrongPassword, isAlphanumeric } from 'validator'
 
 const RegisterPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, error, isAuthenticated } = useSelector((state) => state.auth);
+  const { loading, error } = useSelector((state) => state.auth);
+  const [validationError, setValidationError] = useState('');
 
   const [userDetails, setUserDetails] = useState({ username: '', password: '', confirmPassword: '' });
 
   const handleRegister = () => {
+    if (!isStrongPassword(userDetails.password, { minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1 })) {
+      setValidationError(
+        'Password must be at least 8 characters long, and include uppercase, lowercase, numbers, and symbols.'
+      );
+      return ;
+    }
+
     if (userDetails.password !== userDetails.confirmPassword) {
-      alert('Passwords do not match!');
+      setValidationError('Passwords do not match!');
       return;
     }
-    dispatch(registerUser(userDetails));
-    navigate('/login');
+
+    if (!isAlphanumeric(userDetails.username) || userDetails.username.length < 3 || userDetails.username.length > 15) {
+      setValidationError('Username must be alphanumeric and between 3-15 characters.');
+      return;
+    }
+
+
+    setValidationError('')
+
+    dispatch(registerUser({userDetails, navigate}));
+    //navigate('/login');
     
   };
 
@@ -48,6 +66,7 @@ const RegisterPage = () => {
         fullWidth
         margin="normal"
       />
+      {validationError && <Typography color="error">{validationError}</Typography>}
       {error && <Typography color="error">{error}</Typography>}
       <Button
         onClick={handleRegister}

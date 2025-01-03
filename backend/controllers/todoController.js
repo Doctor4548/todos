@@ -49,9 +49,38 @@ const updateTodo = async (req, res) => {
             return res.status(404).json({ message: 'Task not found or not authorized' });
         }
 
-
-
         updatedTask.completed = !updatedTask.completed;
+
+        await updatedTask.save();
+
+
+        return res.status(200).json({
+            message: 'Task updated successfully',
+            task: updatedTask
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: 'Server error while updating task',
+            error: error.message
+        });
+    }
+};
+
+
+const updateTodoData = async (req, res) => {
+    const { id } = req.params;
+    const {title, content} = req.body;
+    try {
+        const updatedTask = await todoModel.findById(id)
+
+        if (!updatedTask) {
+            return res.status(404).json({ message: 'Task not found or not authorized' });
+        }
+
+
+
+        updatedTask.title = title;
+        updatedTask.content = content;
 
         await updatedTask.save();
 
@@ -95,5 +124,6 @@ module.exports = {
     createTodo,
     getTodos,
     updateTodo,
+    updateTodoData,
     deleteTodo
 };

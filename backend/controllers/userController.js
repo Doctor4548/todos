@@ -53,7 +53,14 @@ const handleUserLogin = async (req, res) => {
 
     try {
         const duplicateUser = await userModel.findOne({ username: username })
+
+
+        if(!duplicateUser){
+            return res.status(400).json('password or username does not match')
+        }
+
         const passwordMatch = bcrypt.compareSync(password, duplicateUser.password)
+
 
         if (! duplicateUser || !passwordMatch) {
             return res.status(400).json('password or username does not match')

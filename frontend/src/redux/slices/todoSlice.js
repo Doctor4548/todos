@@ -37,6 +37,15 @@ export const updateTodoStatus = createAsyncThunk('todos/updateTodoStatus', async
   }
 });
 
+export const updateTodoData = createAsyncThunk('todos/updateTodoData', async({title, content, id}, thunkAPI) => {
+  try {
+    const response = await axios.patch(`/todo/tasks/${id}`, { title, content });
+    return response.data.task;
+  } catch (error) {
+    return thunkAPI.rejectWithValue(error.response.data);
+  }
+})
+
 const todoSlice = createSlice({
   name: 'todos',
   initialState: { tasks: [], loading: false, error: null },
@@ -101,6 +110,30 @@ const todoSlice = createSlice({
         state.loading = true;
       })
       .addCase(updateTodoStatus.rejected, (state, action) => {
+        state.error = action.payload;
+        state.loading = false;
+      })
+
+
+
+
+      .addCase(updateTodoData.fulfilled, (state, action) => {
+        const index = state.tasks.findIndex(task => task._id === action.payload._id);
+        if (index !== -1) {
+          state.tasks[index] = action.payload;
+        }
+
+        state.tasks = state.tasks.sort((a, b) => {
+          if (a.completed === b.completed) return 0;
+          return a.completed ? 1 : -1;
+        });
+
+        state.loading = false;
+      })
+      .addCase(updateTodoData.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(updateTodoData.rejected, (state, action) => {
         state.error = action.payload;
         state.loading = false;
       });
