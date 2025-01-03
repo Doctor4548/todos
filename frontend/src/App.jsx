@@ -3,8 +3,8 @@ import React, {lazy, Suspense} from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { store } from './redux/store';
-import ProtectedRoute from './components/ProtectedRoute';
 
+const ProtectedRoute = lazy(()=>import('./components/ProtectedRoute'))
 const LoginPage = lazy(() => import('./components/LoginPage'));
 const RegisterPage = lazy(() => import('./components/RegisterPage'));
 const HomePage = lazy(() => import('./components/HomePage'));

@@ -4,14 +4,17 @@ import { Navigate } from 'react-router-dom';
 import { checkUserAuth } from '../redux/slices/authSlice'
 
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useSelector((state) => state.auth);
+  const { isAuthenticated, loading, isInitialized  } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
   useEffect(()=>{
-    dispatch(checkUserAuth())
-  }, [dispatch])
+    if(!isInitialized){
+      dispatch(checkUserAuth())
+    }
+  }, [dispatch, isInitialized])
 
-  if(loading){
+  //console.log(isAuthenticated, loading)
+  if(loading || !isInitialized){
     return <div>Loading...</div>
   }
 
